@@ -48,21 +48,23 @@ def merge_lines(text):
 
 
 def generate_embeddings(sentences, batch_size=16):
-    print("Gerando embeddings para as sentenças...")
     """
-    Gera embeddings para uma lista de sentenças usando Sentence-BERT.
+    Gera embeddings para uma lista de sentenças usando Sentence-BERT
 
     Args:
         sentences (list): Lista de sentenças.
     Returns:
         list: Lista contendo os embeddings das sentenças.
     """
+    print("Gerando embeddings para as sentenças...")
     embeddings = []
-    for i in range(0, len(sentences), batch_size):
+    total_batches = (len(sentences) + batch_size - 1) // batch_size  # Calcula o número total de batches
+
+    for i in tqdm(range(0, len(sentences), batch_size), total=total_batches, desc="Processando batches"):
         batch = sentences[i : i + batch_size]
-        print(f"Gerando embeddings para batch de {len(batch)} sentenças...")
         batch_embeddings = MODELEMB.encode(batch, convert_to_tensor=True)
         embeddings.append(batch_embeddings)
+
     embeddings = torch.cat(embeddings, dim=0)
     print("Embeddings gerados com sucesso.")
     return embeddings
