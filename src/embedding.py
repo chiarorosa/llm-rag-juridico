@@ -1,5 +1,7 @@
 # src/embedding.py
 
+import logging
+
 import torch
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
@@ -17,7 +19,7 @@ def generate_embeddings(sentences, model_name, batch_size):
     Returns:
         torch.Tensor: Tensor contendo os embeddings das sentenças.
     """
-    print("Gerando embeddings para as sentenças...")
+    logging.info("Gerando embeddings para as sentenças...")
     embeddings = []
     model = SentenceTransformer(model_name)
     # Calcula o número total de batches
@@ -31,7 +33,7 @@ def generate_embeddings(sentences, model_name, batch_size):
 
     # Concatena todos os embeddings em um único tensor
     embeddings = torch.cat(embeddings, dim=0)
-    print("Embeddings gerados com sucesso.")
+    logging.info("Embeddings gerados com sucesso.")
     return embeddings
 
 
@@ -53,3 +55,4 @@ def create_embeddings(collection, sentences, embeddings):
         embeddings=embeddings_list,
         ids=ids,
     )
+    logging.info(f"Adicionadas {len(sentences)} sentenças e seus embeddings ao banco de dados vetorial.")
