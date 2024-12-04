@@ -20,6 +20,8 @@ MODELEMB = SentenceTransformer("all-MiniLM-L6-v2")  # Sentence-BERT
 EMBEDDING_DIM = 384  # Dimensão dos embeddings do modelo Sentence-BERT
 TOKENIZER = "tokenizers/punkt/english.pickle"  # Tokenizer do NLTK
 
+nltk.download("punkt")  # Baixar o tokenizer do NLTK
+
 
 def read_pdf(file_path):
     """Lê o conteúdo de um arquivo PDF e retorna o texto completo."""
