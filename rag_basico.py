@@ -232,14 +232,25 @@ def main():
         return
 
     # Recuperação e construção do prompt
+    query_list = queries + respostas
+    if not query_list:
+        print("Nenhuma query ou resposta fictícia disponível para recuperação.")
+        return
+
+    # Gera embeddings para todas as queries de uma vez
+    query_embeddings = generate_embeddings(query_list)
+    query_embeddings_list = query_embeddings.cpu().numpy().tolist()
+
+    # Consulta o banco de dados com todas as embeddings
+    docs = collection.query(query_embeddings=query_embeddings_list, n_results=10)
+
     all_docs = []
-    for query_ in queries + respostas:
-        query_embedding = generate_embeddings([query_])[0].cpu().numpy().tolist()
-        docs = collection.query(query_embeddings=[query_embedding], n_results=10)
-        if docs and "documents" in docs and docs["documents"]:
-            all_docs.extend(docs["documents"][0])
-        else:
-            print(f"Nenhum documento encontrado para a query: {query_}")
+    if docs and "documents" in docs:
+        for doc_list in docs["documents"]:
+            all_docs.extend(doc_list)
+    else:
+        print("Nenhum documento encontrado para as queries fornecidas.")
+        return
 
     if not all_docs:
         print("Nenhum documento relevante encontrado para as queries fornecidas.")
