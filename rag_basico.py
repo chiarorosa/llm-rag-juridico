@@ -71,21 +71,16 @@ def generate_embeddings(sentences, batch_size=16):
 
 
 def create_embeddings(collection, sentences):
-    """
-    Adiciona sentenças e seus embeddings ao banco de dados vetorial.
+    embeddings = generate_embeddings(sentences)
+    embeddings_list = embeddings.cpu().numpy().tolist()
+    ids = [f"sentence_{idx}" for idx in range(len(sentences))]
 
-    Args:
-        collection (chromadb.Collection): Coleção do banco vetorial.
-        sentences (list): Lista de sentenças.
-    """
-    embeddings = generate_embeddings(sentences)  # Geração de embeddings com Sentence-BERT
-
-    for idx, (sentence, embedding) in enumerate(zip(sentences, embeddings)):
-        collection.add(
-            documents=[sentence],
-            embeddings=[embedding.cpu().numpy().tolist()],  # Converter tensor para lista
-            ids=[f"sentence_{idx}"],
-        )
+    # Adiciona todos os dados de uma vez
+    collection.add(
+        documents=sentences,
+        embeddings=embeddings_list,
+        ids=ids,
+    )
 
 
 def query_collection(collection, query_text, n_results=3):
