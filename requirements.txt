@@ -1,0 +1,8 @@
+openai
+tiktoken
+chromadb
+PyPDF2
+tqdm
+python-dotenv
+pyyaml
+ollama

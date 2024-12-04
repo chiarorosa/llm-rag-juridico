@@ -1,0 +1,36 @@
+System_Prompt: |
+  Você é um assistente de IA que responde perguntas sobre artigos científicos.
+
+Prompt: |
+  Usando exclusivamente as informações contidas na seção Base de Dados, responda a pergunta contida na seção Pergunta do Usuário. Se não há informações suficientes para responder a pergunta, responda com algo indicando que não há informações suficientes. Responda na mesma língua da pergunta. Não mencione a Base de Dados na resposta.
+
+  Ao responder, siga estas instruções:
+  - Seja objetivo e direto.
+  - Seja formal e profissional.
+  - Se a pergunta não tiver relação com o artigo, não responda.
+
+  # Pergunta do Usuário
+  {query}
+
+  # Base de Dados
+  {chunks}
+
+Prompt_Expansao: |
+  Considere a query abaixo submetida por um usuário a um sistema do tipo RAG que responde perguntas sobre artigos científicos.
+
+  Avalie se esta query é composta, ou seja, se ela possui mais de uma pergunta. Para cada pergunta identificada, gere uma string com 2 a 4 termos independentes separados por vírgulas. Um termo é uma ou mais palavras que podem ser usadas para recuperar informações relevantes que podem responder a pergunta. Também gere, para cada pergunta, uma resposta fictícia simulando como a resposta para a pergunta apareceria no artigo. Tanto os termos como as respostas devem estar em inglês, mesmo que a query esteja em outra língua.
+
+  Exemplos de extração de "termos":
+  - "Que modelos de LLMs são avaliados pelo artigo?" -> "LLM, model, models"
+  - "What are the main results of the article?" -> "results, outcomes, findings, contributions"
+
+  Retorne exclusivamente no seguinte formato JSON. Qualquer saída fora desse formato será considerada inválida:
+  ```json
+  {{
+    "termos": ["termo1_pergunta1", "termo2_pergunta1"],
+    "respostas_ficticias": ["resposta_pergunta1"]
+  }}
+  ```
+
+  # Query do Usuário
+  {query}
