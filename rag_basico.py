@@ -7,11 +7,13 @@ rag_basico.py - implementação em Python adaptada para uso do ollama por @chiar
 import json
 
 import chromadb
+import fitz  # PyMuPDF
 import nltk
 import torch
 import yaml
 from ollama import chat
-from PyPDF2 import PdfReader
+
+# from PyPDF2 import PdfReader
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
@@ -24,9 +26,12 @@ nltk.download("punkt")  # Baixar o tokenizer do NLTK
 
 
 def read_pdf(file_path):
-    """Lê o conteúdo de um arquivo PDF e retorna o texto completo."""
-    reader = PdfReader(file_path)
-    return "".join([page.extract_text() + "\n" for page in reader.pages])
+    """Lê o conteúdo de um arquivo PDF e retorna o texto completo usando PyMuPDF."""
+    text = ""
+    with fitz.open(file_path) as doc:
+        for page in doc:
+            text += page.get_text() + "\n"
+    return text
 
 
 def merge_lines(text):

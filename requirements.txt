@@ -3,6 +3,6 @@ nltk
 torch
 PyYAML
 ollama
-PyPDF2
+PyMuPDF
 sentence-transformers
 tqdm
