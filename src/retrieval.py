@@ -1,7 +1,5 @@
 # src/retrieval.py
 
-import chromadb
-
 
 def query_collection(collection, query_embeddings, n_results):
     """
