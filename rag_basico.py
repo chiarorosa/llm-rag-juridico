@@ -103,19 +103,21 @@ def get_completion(prompt, system_prompt, model=MODELLLM):
     """
     Obtém uma resposta do modelo de linguagem usando o Ollama.
 
-    Modelos testados: phi3.5:3.8b, llama3.1:8b, llama3.2:3b
-
     Args:
         prompt (str): O prompt principal a ser enviado ao modelo.
         system_prompt (str): O prompt de sistema que define o comportamento do modelo.
         model (str): Nome do modelo a ser usado.
 
     Returns:
-        str: A resposta gerada pelo modelo.
+        str: A resposta gerada pelo modelo ou None em caso de erro.
     """
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}]
-    response = chat(model=model, messages=messages)
-    return response["message"]["content"]
+    try:
+        response = chat(model=model, messages=messages)
+        return response["message"]["content"]
+    except Exception as e:
+        print(f"Erro ao obter resposta do modelo: {e}")
+        return None
 
 
 def parse_response(response):
@@ -131,28 +133,32 @@ def parse_response(response):
         print("A resposta do modelo está vazia.")
         return None
 
-    # Limpar a resposta removendo código e formatação desnecessária
-    response = response.strip()
-    if response.startswith("```json"):
-        response = response[7:]
-    if response.endswith("```"):
-        response = response[:-3]
+    import re
 
-    response = response.replace("\n", " ").replace("\r", " ").replace("```", "").strip()
+    # Remover marcadores de código e espaços em branco
+    response = response.strip().strip("```").strip()
 
-    try:
-        return json.loads(response)
-    except json.JSONDecodeError as e:
-        print(f"Erro ao decodificar JSON: {e}")
+    # Procurar pelo primeiro objeto JSON na resposta
+    match = re.search(r"\{.*\}", response, re.DOTALL)
+    if match:
+        json_str = match.group()
+        # Tentar decodificar o JSON
         try:
-            # Tentativa de localizar o início e fim do JSON válido
-            start = response.find("{")
-            end = response.rfind("}") + 1
-            if start != -1 and end != -1:
-                response = response[start:end]
-                return json.loads(response)
-        except json.JSONDecodeError as e2:
-            print(f"Erro adicional ao tentar extrair JSON: {e2}")
+            return json.loads(json_str)
+        except json.JSONDecodeError as e:
+            print(f"Erro ao decodificar JSON: {e}")
+            print("Tentando corrigir a formatação do JSON...")
+
+            # Tentativa de corrigir aspas simples para aspas duplas
+            json_str_fixed = json_str.replace("'", '"')
+            try:
+                return json.loads(json_str_fixed)
+            except json.JSONDecodeError as e2:
+                print(f"Erro ao decodificar JSON após correção: {e2}")
+                print("JSON recebido:", json_str)
+                return None
+    else:
+        print("Não foi possível encontrar um objeto JSON na resposta.")
         print("Resposta recebida:", response)
         return None
 
@@ -202,21 +208,40 @@ def main():
     expansion_prompt = prompts["Prompt_Expansao"].format(query=user_query)
     response = get_completion(expansion_prompt, system_prompt)
 
+    if response is None:
+        print("Não foi possível obter uma resposta do modelo para a expansão da query.")
+        return
+
     # Processar a resposta
     response_json = parse_response(response)
-    queries = response_json.get("termos", []) if response_json else []
-    respostas = response_json.get("respostas_ficticias", []) if response_json else []
+    if response_json is None:
+        print("Não foi possível parsear a resposta do modelo para a expansão da query.")
+        return
+
+    queries = response_json.get("termos", [])
+    respostas = response_json.get("respostas_ficticias", [])
 
     print("Queries:", queries)
     print("Respostas fictícias:", respostas)
 
+    # Verificar se queries e respostas não estão vazias
+    if not queries and not respostas:
+        print("Nenhuma query ou resposta fictícia disponível para recuperação.")
+        return
+
     # Recuperação e construção do prompt
     all_docs = []
     for query_ in queries + respostas:
-        docs = collection.query(
-            query_embeddings=[generate_embeddings([query_])[0].cpu().numpy().tolist()], n_results=10
-        )
-        all_docs.extend(docs["documents"][0])
+        query_embedding = generate_embeddings([query_])[0].cpu().numpy().tolist()
+        docs = collection.query(query_embeddings=[query_embedding], n_results=10)
+        if docs and "documents" in docs and docs["documents"]:
+            all_docs.extend(docs["documents"][0])
+        else:
+            print(f"Nenhum documento encontrado para a query: {query_}")
+
+    if not all_docs:
+        print("Nenhum documento relevante encontrado para as queries fornecidas.")
+        return
 
     formatted_chunks = "\n".join([f"{chunk}\n" for chunk in all_docs])
     final_prompt = build_prompt(prompt_template, formatted_chunks, user_query)
@@ -224,6 +249,10 @@ def main():
 
     # Geração da resposta final
     final_response = get_completion(final_prompt, system_prompt)
+    if final_response is None:
+        print("Não foi possível obter a resposta final do modelo.")
+        return
+
     print("Query original:", user_query)
     print("Resposta gerada:\n", final_response)
 
