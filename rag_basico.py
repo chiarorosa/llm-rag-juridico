@@ -21,6 +21,7 @@ MODELLLM = "llama3.2:3b"  # Modelo de linguagem a ser usado
 MODELEMB = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")  # Sentence-BERT
 EMBEDDING_DIM = 384  # Dimensão dos embeddings do modelo Sentence-BERT
 TOKENIZER = "tokenizers/punkt/english.pickle"  # Tokenizer do NLTK
+PROMPT_TEMPLATE_FILE = "prompt_template.yml"  # Arquivo com os templates de prompt
 
 nltk.download("punkt")  # Baixar o tokenizer do NLTK
 
@@ -202,8 +203,12 @@ def main():
         print(f"Distance: {distance}\n")
 
     # Ler os templates de prompt
-    with open("prompt_template.yml", "r") as file:
-        prompts = yaml.safe_load(file)
+    try:
+        with open(PROMPT_TEMPLATE_FILE, "r") as file:
+            prompts = yaml.safe_load(file)
+    except FileNotFoundError:
+        print(f"Arquivo {PROMPT_TEMPLATE_FILE} não encontrado.")
+        return
     system_prompt = prompts["System_Prompt"]
     prompt_template = prompts["Prompt"]
 
