@@ -16,7 +16,7 @@ from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
 MODELLLM = "llama3.2:3b"  # Modelo de linguagem a ser usado
-MODELEMB = SentenceTransformer("all-MiniLM-L6-v2")  # Sentence-BERT
+MODELEMB = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")  # Sentence-BERT
 EMBEDDING_DIM = 384  # Dimensão dos embeddings do modelo Sentence-BERT
 TOKENIZER = "tokenizers/punkt/english.pickle"  # Tokenizer do NLTK
 
