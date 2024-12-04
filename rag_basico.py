@@ -76,9 +76,11 @@ def query_collection(collection, query_text, n_results=3):
     return zip(results["documents"][0], results["distances"][0])
 
 
-def get_completion(prompt, system_prompt, model="llama3.2:3b"):
+def get_completion(prompt, system_prompt, model="llama3.1:8b"):
     """
     Obtém uma resposta do modelo de linguagem usando o Ollama.
+
+    Modelos testados: phi3.5:3.8b, llama3.1:8b, llama3.2:3b
 
     Args:
         prompt (str): O prompt principal a ser enviado ao modelo.
