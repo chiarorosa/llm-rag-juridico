@@ -12,8 +12,6 @@ import nltk
 import torch
 import yaml
 from ollama import chat
-
-# from PyPDF2 import PdfReader
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
