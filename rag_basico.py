@@ -5,6 +5,7 @@ rag_basico.py - implementação em Python adaptada para uso do ollama por @chiar
 """
 
 import json
+import re
 
 import chromadb
 import fitz  # PyMuPDF
@@ -15,6 +16,7 @@ from ollama import chat
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
+BATCH_SIZE = 16
 MODELLLM = "llama3.2:3b"  # Modelo de linguagem a ser usado
 MODELEMB = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")  # Sentence-BERT
 EMBEDDING_DIM = 384  # Dimensão dos embeddings do modelo Sentence-BERT
@@ -41,13 +43,13 @@ def merge_lines(text):
     Returns:
         list: Lista de sentenças.
     """
-    text = text.replace("\n", " ")
+    text = re.sub(r"\s+", " ", text)
     tokenizer = nltk.data.load(TOKENIZER)
     sentences = tokenizer.tokenize(text)
     return sentences
 
 
-def generate_embeddings(sentences, batch_size=16):
+def generate_embeddings(sentences, batch_size=BATCH_SIZE):
     """
     Gera embeddings para uma lista de sentenças usando Sentence-BERT
 
