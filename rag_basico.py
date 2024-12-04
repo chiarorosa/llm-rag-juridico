@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""rag_basico.ipynb"""
+"""
+rag_basico.ipynb - implementação original em Jupyter Notebook desenvolvida por @ricardoaraujo na unidade de RAG do PPGC
+rag_basico.py - implementação em Python adaptada para uso do ollama por @chiarorosa
+"""
 
 import json
 
