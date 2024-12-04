@@ -7,10 +7,16 @@ rag_basico.py - implementação em Python adaptada para uso do ollama por @chiar
 import json
 
 import chromadb
+import torch
 import yaml
 from ollama import chat
 from PyPDF2 import PdfReader
+from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
+
+MODELLLM = "llama3.1:8b"  # Modelo de linguagem a ser usado
+MODELEMB = SentenceTransformer("all-MiniLM-L6-v2")  # Sentence-BERT
+EMBEDDING_DIM = 384  # Dimensão dos embeddings do modelo Sentence-BERT
 
 
 def read_pdf(file_path):
@@ -48,16 +54,43 @@ def merge_lines(text_lines):
     return merged
 
 
+def generate_embeddings(sentences, batch_size=16):
+    print("Gerando embeddings para as sentenças...")
+    """
+    Gera embeddings para uma lista de sentenças usando Sentence-BERT.
+
+    Args:
+        sentences (list): Lista de sentenças.
+    Returns:
+        list: Lista contendo os embeddings das sentenças.
+    """
+    embeddings = []
+    for i in range(0, len(sentences), batch_size):
+        batch = sentences[i : i + batch_size]
+        print(f"Gerando embeddings para batch de {len(batch)} sentenças...")
+        batch_embeddings = MODELEMB.encode(batch, convert_to_tensor=True)
+        embeddings.append(batch_embeddings)
+    embeddings = torch.cat(embeddings, dim=0)
+    print("Embeddings gerados com sucesso.")
+    return embeddings
+
+
 def create_embeddings(collection, sentences):
     """
-    Adiciona sentenças a um banco de dados vetorial.
+    Adiciona sentenças e seus embeddings ao banco de dados vetorial.
 
     Args:
         collection (chromadb.Collection): Coleção do banco vetorial.
         sentences (list): Lista de sentenças.
     """
-    for idx, sentence in tqdm(enumerate(sentences), total=len(sentences)):
-        collection.add(documents=[sentence], ids=[f"sentence_{idx}"])
+    embeddings = generate_embeddings(sentences)  # Geração de embeddings com Sentence-BERT
+
+    for idx, (sentence, embedding) in enumerate(zip(sentences, embeddings)):
+        collection.add(
+            documents=[sentence],
+            embeddings=[embedding.cpu().numpy().tolist()],  # Converter tensor para lista
+            ids=[f"sentence_{idx}"],
+        )
 
 
 def query_collection(collection, query_text, n_results=3):
@@ -72,11 +105,13 @@ def query_collection(collection, query_text, n_results=3):
     Returns:
         list: Lista de documentos e distâncias.
     """
-    results = collection.query(query_texts=[query_text], n_results=n_results)
+    # Gera embedding para a query
+    query_embedding = generate_embeddings([query_text])[0].cpu().numpy().tolist()
+    results = collection.query(query_embeddings=[query_embedding], n_results=n_results)
     return zip(results["documents"][0], results["distances"][0])
 
 
-def get_completion(prompt, system_prompt, model="llama3.1:8b"):
+def get_completion(prompt, system_prompt, model=MODELLLM):
     """
     Obtém uma resposta do modelo de linguagem usando o Ollama.
 
@@ -108,11 +143,28 @@ def parse_response(response):
         print("A resposta do modelo está vazia.")
         return None
 
-    response = response.strip().replace("```json", "").replace("```", "").strip()
+    # Limpar a resposta removendo código e formatação desnecessária
+    response = response.strip()
+    if response.startswith("```json"):
+        response = response[7:]
+    if response.endswith("```"):
+        response = response[:-3]
+
+    response = response.replace("\n", " ").replace("\r", " ").replace("```", "").strip()
+
     try:
         return json.loads(response)
     except json.JSONDecodeError as e:
         print(f"Erro ao decodificar JSON: {e}")
+        try:
+            # Tentativa de localizar o início e fim do JSON válido
+            start = response.find("{")
+            end = response.rfind("}") + 1
+            if start != -1 and end != -1:
+                response = response[start:end]
+                return json.loads(response)
+        except json.JSONDecodeError as e2:
+            print(f"Erro adicional ao tentar extrair JSON: {e2}")
         print("Resposta recebida:", response)
         return None
 
@@ -140,7 +192,7 @@ def main():
 
     # Criar coleção no banco vetorial
     chroma_client = chromadb.Client()
-    collection = chroma_client.create_collection(name="artigo_exemplo")
+    collection = chroma_client.create_collection(name="artigo_exemplo", embedding_function=None)
     create_embeddings(collection, sentences)
 
     # Teste simples de recuperação
@@ -173,7 +225,9 @@ def main():
     # Recuperação e construção do prompt
     all_docs = []
     for query_ in queries + respostas:
-        docs = collection.query(query_texts=[query_], n_results=10)
+        docs = collection.query(
+            query_embeddings=[generate_embeddings([query_])[0].cpu().numpy().tolist()], n_results=10
+        )
         all_docs.extend(docs["documents"][0])
 
     formatted_chunks = "\n".join([f"{chunk}\n" for chunk in all_docs])
