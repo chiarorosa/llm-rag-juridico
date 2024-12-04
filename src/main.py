@@ -1,6 +1,7 @@
 # src/main.py
 
 import argparse
+import glob  # Importar glob para listar arquivos
 import logging
 import os
 import sys
@@ -61,22 +62,48 @@ def main():
         # Baixa o tokenizer do NLTK se necessário
         nltk.download("punkt", quiet=True)
 
-        # Ler e pré-processar o texto do PDF
-        pdf_file_path = os.path.join(
-            os.path.dirname(__file__), "../", data_config["raw_data_path"], data_config["pdf_file"]
-        )
-        text = read_pdf(pdf_file_path)
-        sentences = merge_lines(text, tokenizer_config["path"])
+        # Caminho para a pasta de PDFs
+        pdf_folder_path = os.path.join(os.path.dirname(__file__), "../", data_config["raw_data_path"])
+
+        # Lista para armazenar todas as sentenças de todos os PDFs
+        all_sentences = []
+
+        # Lista todos os arquivos PDF na pasta
+        pdf_files = glob.glob(os.path.join(pdf_folder_path, "*.pdf"))
+        num_files = len(pdf_files)
+        logging.info(f"Número de arquivos PDF encontrados: {num_files}")
+
+        # Verifica se há arquivos PDF para processar
+        if num_files == 0:
+            logging.warning("Nenhum arquivo PDF encontrado na pasta especificada.")
+            return
+
+        # Percorre todos os arquivos PDF na pasta
+        for pdf_file in pdf_files:
+            logging.info(f"Lendo e processando o arquivo: {pdf_file}")
+            text = read_pdf(pdf_file)
+            sentences = merge_lines(text, tokenizer_config["path"])
+            logging.info(f"Número de sentenças extraídas do arquivo {pdf_file}: {len(sentences)}")
+            all_sentences.extend(sentences)
+
+        # Verifica se coletou alguma sentença
+        if not all_sentences:
+            logging.warning("Nenhuma sentença foi extraída dos PDFs fornecidos.")
+            return
+
+        logging.info(f"Número total de sentenças extraídas: {len(all_sentences)}")
 
         # Criar cliente e coleção no banco vetorial
         chroma_client = chromadb.Client()
         collection = chroma_client.create_collection(name=retrieval_config["collection_name"], embedding_function=None)
 
         # Gera embeddings das sentenças
-        embeddings = generate_embeddings(sentences, model_config["embedding_model_name"], model_config["batch_size"])
+        embeddings = generate_embeddings(
+            all_sentences, model_config["embedding_model_name"], model_config["batch_size"]
+        )
 
         # Adiciona as sentenças e embeddings à coleção
-        create_embeddings(collection, sentences, embeddings)
+        create_embeddings(collection, all_sentences, embeddings)
 
         # Ler os templates de prompt
         prompt_template_file = os.path.join(os.path.dirname(__file__), "../", prompts_config["template_file"])
