@@ -16,7 +16,7 @@ from ollama import chat
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
-BATCH_SIZE = 16
+BATCH_SIZE = 32  # Tamanho do batch para geração de embeddings
 MODELLLM = "llama3.2:3b"  # Modelo de linguagem a ser usado
 MODELEMB = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")  # Sentence-BERT
 EMBEDDING_DIM = 384  # Dimensão dos embeddings do modelo Sentence-BERT
