@@ -1,6 +1,7 @@
 # src/llm_interface.py
 
 import json
+import logging
 import re
 
 from ollama import chat
@@ -20,10 +21,11 @@ def get_completion(prompt, system_prompt, model):
     """
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}]
     try:
+        logging.info("Enviando prompt ao modelo de linguagem...")
         response = chat(model=model, messages=messages)
         return response["message"]["content"]
     except Exception as e:
-        print(f"Erro ao obter resposta do modelo: {e}")
+        logging.error(f"Erro ao obter resposta do modelo: {e}")
         return None
 
 
@@ -38,7 +40,7 @@ def parse_response(response):
         dict: Objeto JSON decodificado ou None se houver erro.
     """
     if not response:
-        print("A resposta do modelo está vazia.")
+        logging.warning("A resposta do modelo está vazia.")
         return None
 
     # Remove marcadores de código e espaços em branco
@@ -52,18 +54,18 @@ def parse_response(response):
         try:
             return json.loads(json_str)
         except json.JSONDecodeError as e:
-            print(f"Erro ao decodificar JSON: {e}")
-            print("Tentando corrigir a formatação do JSON...")
+            logging.error(f"Erro ao decodificar JSON: {e}")
+            logging.info("Tentando corrigir a formatação do JSON...")
 
             # Tenta corrigir aspas simples para aspas duplas
             json_str_fixed = json_str.replace("'", '"')
             try:
                 return json.loads(json_str_fixed)
             except json.JSONDecodeError as e2:
-                print(f"Erro ao decodificar JSON após correção: {e2}")
-                print("JSON recebido:", json_str)
+                logging.error(f"Erro ao decodificar JSON após correção: {e2}")
+                logging.error(f"JSON recebido: {json_str}")
                 return None
     else:
-        print("Não foi possível encontrar um objeto JSON na resposta.")
-        print("Resposta recebida:", response)
+        logging.error("Não foi possível encontrar um objeto JSON na resposta.")
+        logging.error(f"Resposta recebida: {response}")
         return None
