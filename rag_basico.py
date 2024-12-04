@@ -7,6 +7,7 @@ rag_basico.py - implementação em Python adaptada para uso do ollama por @chiar
 import json
 
 import chromadb
+import nltk
 import torch
 import yaml
 from ollama import chat
@@ -14,9 +15,10 @@ from PyPDF2 import PdfReader
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
-MODELLLM = "llama3.1:8b"  # Modelo de linguagem a ser usado
+MODELLLM = "llama3.2:3b"  # Modelo de linguagem a ser usado
 MODELEMB = SentenceTransformer("all-MiniLM-L6-v2")  # Sentence-BERT
 EMBEDDING_DIM = 384  # Dimensão dos embeddings do modelo Sentence-BERT
+TOKENIZER = "tokenizers/punkt/english.pickle"  # Tokenizer do NLTK
 
 
 def read_pdf(file_path):
@@ -25,33 +27,19 @@ def read_pdf(file_path):
     return "".join([page.extract_text() + "\n" for page in reader.pages])
 
 
-def merge_lines(text_lines):
+def merge_lines(text):
     """
-    Pré-processa o texto, unindo linhas e separando por sentenças.
+    Pré-processa o texto, unindo linhas quebradas e separando por sentenças completas.
 
     Args:
-        text_lines (list): Lista de strings (linhas do texto).
+        text (str): Texto completo extraído do PDF.
     Returns:
         list: Lista de sentenças.
     """
-    merged, current_sentence = [], ""
-    for line in text_lines:
-        line = line.strip()
-        if not line:
-            continue
-
-        if current_sentence:
-            line = " " + line
-        current_sentence += line
-
-        if ". " in current_sentence:
-            parts = current_sentence.split(". ")
-            merged.extend([part + "." for part in parts[:-1]])
-            current_sentence = parts[-1]
-
-    if current_sentence:
-        merged.append(current_sentence)
-    return merged
+    text = text.replace("\n", " ")
+    tokenizer = nltk.data.load(TOKENIZER)
+    sentences = tokenizer.tokenize(text)
+    return sentences
 
 
 def generate_embeddings(sentences, batch_size=16):
@@ -188,7 +176,7 @@ def build_prompt(prompt_template, chunks, query):
 def main():
     # Ler e pré-processar o texto do PDF
     text = read_pdf("artigo_exemplo.pdf")
-    sentences = merge_lines(text.split("\n"))
+    sentences = merge_lines(text)
 
     # Criar coleção no banco vetorial
     chroma_client = chromadb.Client()
