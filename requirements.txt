@@ -1,8 +1,8 @@
-openai
-tiktoken
 chromadb
-PyPDF2
-tqdm
-python-dotenv
-pyyaml
+nltk
+torch
+PyYAML
 ollama
+PyPDF2
+sentence-transformers
+tqdm
