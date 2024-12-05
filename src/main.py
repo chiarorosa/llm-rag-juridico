@@ -43,7 +43,9 @@ def main():
 
     # Analisa os argumentos de linha de comando
     args = parse_arguments()
-    user_query = args.query or "Qual é a relação entre ações coletivas e direitos individuais no CDC?"
+    user_query = (
+        args.query or "Quais os fundamentos jurídicos para a condenação por práticas abusivas em pacotes turísticos?"
+    )
 
     try:
         ###

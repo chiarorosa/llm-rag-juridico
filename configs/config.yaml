@@ -4,9 +4,13 @@ data:
   raw_data_path: "data/raw/"
 
 model:
-  llm_name: "llava-llama3"
-  embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2" # @https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-  batch_size: 32
+  #llm_name: "qwen2.5:7b"
+  #llm_name: "cnmoro/mistral_7b_portuguese:q8_0"
+  llm_name: "llama3.1:8b"
+  embedding_model_name: "all-MiniLM-L6-v2"
+  #embedding_model_name: "all-mpnet-base-v2"
+  #embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2" # @https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  batch_size: 16
 
 tokenizer:
   path: "tokenizers/punkt/portuguese.pickle"
