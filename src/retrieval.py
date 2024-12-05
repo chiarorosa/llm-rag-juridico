@@ -11,7 +11,9 @@ def query_collection(collection, query_embeddings, n_results):
         n_results (int): Número de resultados a recuperar.
 
     Returns:
-        dict: Resultados da consulta.
+        dict: Resultados da consulta, incluindo documentos e metadados.
     """
-    results = collection.query(query_embeddings=query_embeddings, n_results=n_results)
+    results = collection.query(
+        query_embeddings=query_embeddings, n_results=n_results, include=["documents", "metadatas", "distances"]
+    )
     return results
