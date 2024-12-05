@@ -43,10 +43,7 @@ def main():
 
     # Analisa os argumentos de linha de comando
     args = parse_arguments()
-    user_query = (
-        args.query
-        or "Quais são os elementos necessários para comprovar dano moral em contratos de prestação de serviços turísticos?"
-    )
+    user_query = args.query or "Qual é a relação entre ações coletivas e direitos individuais no CDC?"
 
     try:
         # Carrega as configurações do arquivo config.yaml

@@ -15,5 +15,5 @@ prompts:
   template_file: "prompts/prompt_template.yml"
 
 retrieval:
-  collection_name: "juris"
+  collection_name: "juris-ai"
   n_results: 10

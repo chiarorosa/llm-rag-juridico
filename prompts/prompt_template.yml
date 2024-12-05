@@ -22,16 +22,25 @@ Prompt_Expansao: |
 
   Avalie se esta query é composta, ou seja, se ela possui mais de uma pergunta. Para cada pergunta identificada, gere uma string com 2 a 4 termos independentes separados por vírgulas. Um termo é uma ou mais palavras que podem ser usadas para recuperar informações relevantes que podem responder à pergunta. Também gere, para cada pergunta, uma resposta fictícia simulando como a resposta para a pergunta apareceria em uma decisão judicial ou jurisprudência. Tanto os termos como as respostas devem estar em português, mesmo que a query esteja em outra língua.
 
-  Exemplos de extração de "termos":
-  - "Quais são os principais fundamentos para a condenação em Ação Civil Pública ambiental?" -> "ação civil pública, fundamentos, condenação, ambiental"
-  - "Há precedentes relacionados a direitos coletivos em ações civis públicas?" -> "precedentes, direitos coletivos, ações civis públicas"
+  Inclua no JSON os metadados de origem da resposta, como o nome do documento e número da página.
 
   Retorne exclusivamente no seguinte formato JSON. Qualquer saída fora desse formato será considerada inválida:
   ```json
-  {{
+    {{
     "termos": ["termo1_pergunta1", "termo2_pergunta1"],
-    "respostas_ficticias": ["resposta_pergunta1"]
+    "respostas_ficticias": ["resposta_pergunta1"],
+    "referencias": [
+      {{
+        "documento": "Nome do Documento 1",
+        "pagina": "Número da Página 1"
+      }},
+      {{
+        "documento": "Nome do Documento 2",
+        "pagina": "Número da Página 2"
+      }}
+    ]
   }}
+  ```
 
   # Query do Usuário
   {query}
