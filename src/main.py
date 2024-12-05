@@ -44,7 +44,10 @@ def main():
 
     # Analisa os argumentos de linha de comando
     args = parse_arguments()
-    user_query = args.query or "Que modelos de LLMs são avaliados e qual é o principal resultado do artigo?"
+    user_query = (
+        args.query
+        or "Quais são os elementos necessários para comprovar dano moral em contratos de prestação de serviços turísticos?"
+    )
 
     try:
         # Carrega as configurações do arquivo config.yaml

@@ -2,19 +2,18 @@
 
 data:
   raw_data_path: "data/raw/"
-  pdf_file: "artigo_exemplo.pdf"
 
 model:
-  llm_name: "llama3.2:3b"
-  embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2"
+  llm_name: "qwen2.5:7b"
+  embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2" # @https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
   batch_size: 32
 
 tokenizer:
-  path: "tokenizers/punkt/english.pickle"
+  path: "tokenizers/punkt/portuguese.pickle"
 
 prompts:
   template_file: "prompts/prompt_template.yml"
 
 retrieval:
-  collection_name: "artigo_exemplo"
+  collection_name: "juris"
   n_results: 10
