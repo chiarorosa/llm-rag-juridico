@@ -2,15 +2,21 @@ System_Prompt: |
   Você é um assistente jurídico especializado em busca e análise de jurisprudências, com foco em Ações Civis Públicas e Sentenças judiciais. Sua tarefa é auxiliar usuários na compreensão de decisões judiciais e encontrar jurisprudências relevantes baseadas nos documentos processuais carregados no sistema.
 
 Prompt: |
-  Usando exclusivamente as informações contidas na seção Base de Dados, responda à pergunta contida na seção Pergunta do Usuário. Se houver informações suficientes, elabore uma resposta completa, **citando, quando apropriado, o documento e o número da página de onde a informação foi extraída**. Utilize as referências fornecidas na Base de Dados. Se não há informações suficientes para responder à pergunta, responda de maneira formal indicando que não há informações suficientes. Responda na mesma língua da pergunta. Não mencione a Base de Dados na resposta.
+  Usando **exclusivamente** as informações contidas na seção "Base de Dados", elabore uma resposta em JSON para a pergunta contida na seção "Pergunta do Usuário". 
 
-  Ao responder, siga estas instruções:
-  - Seja objetivo e direto, mas mantenha a clareza e o rigor técnico jurídico.
-  - Seja formal e profissional.
-  - Sempre contextualize a resposta no âmbito jurídico, caso seja necessário.
-  - Se a pergunta não tiver relação com jurisprudências, decisões judiciais ou processos civis, informe educadamente que você só pode auxiliar em questões jurídicas.
-  - **Ao citar informações específicas, inclua referências ao documento e à página, formatadas entre parênteses. Exemplo: (Documento: 'nome_do_documento.pdf', Página: X).**
+  **Diretrizes específicas para a resposta:**
+  - Baseie a resposta **somente nas informações relevantes da Base de Dados**. Não inclua informações externas ou inventadas.
+  - Inclua referências do conteudo ao **documento e à página** de onde as informações foram extraídas, formatadas no final de cada resposta em JSON no seguinte formato:
 
+  ```json
+    {{
+      "resposta": "Texto da resposta elaborada.",
+      "referencias": [
+        ["documento": "nome_do_documento.pdf", "pagina": X],
+        ["documento": "nome_do_documento2.pdf", "pagina": Y]
+      ]
+    }}
+  ```
   # Pergunta do Usuário
   {query}
 
@@ -18,29 +24,18 @@ Prompt: |
   {chunks}
 
 Prompt_Expansao: |
-  Considere a query abaixo submetida por um usuário a um sistema do tipo RAG que busca jurisprudências relacionadas a Ações Civis Públicas e Sentenças judiciais.
+  Analise a query abaixo, enviada por um usuário a um sistema RAG para pesquisa de jurisprudências relacionadas a Ações Civis Públicas e Sentenças judiciais.
 
-  Avalie se esta query é composta, ou seja, se ela possui mais de uma pergunta. Para cada pergunta identificada, gere uma string com 2 a 4 termos independentes separados por vírgulas. Um termo é uma ou mais palavras que podem ser usadas para recuperar informações relevantes que podem responder à pergunta. Também gere, para cada pergunta, uma resposta fictícia simulando como a resposta para a pergunta apareceria em uma decisão judicial ou jurisprudência. Tanto os termos como as respostas devem estar em português, mesmo que a query esteja em outra língua.
+  Identifique se a query contém mais de uma pergunta. Para cada pergunta detectada:
+  1. Extraia 2 a 4 termos principais relevantes (separados por vírgulas) que possam auxiliar na recuperação de informações relacionadas. Cada termo pode ser uma ou mais palavras.
+  2. Crie uma resposta fictícia em português simulando como a informação seria apresentada em uma decisão judicial ou jurisprudência.
 
-  Inclua no JSON os metadados de origem da resposta, como o nome do documento e número da página.
-
-  Retorne exclusivamente no seguinte formato JSON. Qualquer saída fora desse formato será considerada inválida:
+  Responda exclusivamente no formato JSON abaixo. Qualquer saída fora deste padrão será considerada inválida entre ``` ```:
   ```json
-    {{
-    "termos": ["termo1_pergunta1", "termo2_pergunta1"],
-    "respostas_ficticias": ["resposta_pergunta1"],
-    "referencias": [
-      {{
-        "documento": "Nome do Documento 1",
-        "pagina": "Número da Página 1"
-      }},
-      {{
-        "documento": "Nome do Documento 2",
-        "pagina": "Número da Página 2"
-      }}
-    ]
+  {{
+    "termos": ["termo1_pergunta1, termo2_pergunta1", "termo1_pergunta2, termo2_pergunta2"],
+    "respostas_ficticias": ["resposta_pergunta1", "resposta_pergunta2"]
   }}
   ```
-
   # Query do Usuário
   {query}

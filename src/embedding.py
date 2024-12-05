@@ -40,7 +40,7 @@ def generate_embeddings(sentences, model_name, batch_size):
 # src/embedding.py
 
 
-def create_embeddings(collection, sentences, embeddings, metadatas):
+def store_embeddings(collection, sentences, embeddings, metadatas):
     """
     Adiciona sentenças, seus embeddings e metadados ao banco de dados vetorial.
 

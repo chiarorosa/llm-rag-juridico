@@ -4,7 +4,7 @@ data:
   raw_data_path: "data/raw/"
 
 model:
-  llm_name: "qwen2.5:7b"
+  llm_name: "llava-llama3"
   embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2" # @https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
   batch_size: 32
 
@@ -15,5 +15,5 @@ prompts:
   template_file: "prompts/prompt_template.yml"
 
 retrieval:
-  collection_name: "juris-ai"
+  collection_name: "juris"
   n_results: 10

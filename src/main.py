@@ -17,7 +17,7 @@ import yaml
 
 # Importações dos módulos do projeto
 from data_loader import read_pdf_with_metadata
-from embedding import create_embeddings, generate_embeddings
+from embedding import generate_embeddings, store_embeddings
 from llm_interface import get_completion, parse_response
 from retrieval import query_collection
 from utils import build_prompt
@@ -46,6 +46,10 @@ def main():
     user_query = args.query or "Qual é a relação entre ações coletivas e direitos individuais no CDC?"
 
     try:
+        ###
+        # Início do pipeline
+        ###
+
         # Carrega as configurações do arquivo config.yaml
         config_path = os.path.join(os.path.dirname(__file__), "../configs/config.yaml")
         with open(config_path, "r") as file:
@@ -107,7 +111,11 @@ def main():
         )
 
         # Adiciona as sentenças, embeddings e metadados à coleção
-        create_embeddings(collection, all_sentences, embeddings, all_metadatas)
+        store_embeddings(collection, all_sentences, embeddings, all_metadatas)
+
+        ###
+        # Início user_query
+        ###
 
         # Ler os templates de prompt
         prompt_template_file = os.path.join(os.path.dirname(__file__), "../", prompts_config["template_file"])
@@ -145,12 +153,9 @@ def main():
         if not queries and not respostas:
             logging.warning("Nenhuma query ou resposta fictícia disponível para recuperação.")
             return
-
-        # Combina as queries e respostas para recuperação
-        query_list = queries + respostas
-        if not query_list:
-            logging.warning("Nenhuma query ou resposta fictícia disponível para recuperação.")
-            return
+        else:
+            # Combina as queries e respostas para recuperação
+            query_list = queries + respostas
 
         # Gera embeddings para todas as queries de uma vez
         query_embeddings = generate_embeddings(
@@ -162,18 +167,13 @@ def main():
         docs = query_collection(collection, query_embeddings_list, retrieval_config["n_results"])
 
         # Coleta todos os documentos e metadados retornados
-        all_docs = []
-        all_metadatas_results = []
+        all_docs, all_metadatas_results = [], []
         if docs and "documents" in docs:
             for doc_list, metadata_list in zip(docs["documents"], docs["metadatas"]):
                 all_docs.extend(doc_list)
                 all_metadatas_results.extend(metadata_list)
         else:
             logging.warning("Nenhum documento encontrado para as queries fornecidas.")
-            return
-
-        if not all_docs:
-            logging.warning("Nenhum documento relevante encontrado para as queries fornecidas.")
             return
 
         # Remove duplicatas mantendo a ordem, tanto nos documentos quanto nos metadados
@@ -190,10 +190,15 @@ def main():
         all_docs = [item[0] for item in combined]
         all_metadatas_results = [item[1] for item in combined]
 
-        # Formatar os chunks para incluir os metadados
-        formatted_chunks = ""
+        # Itera sobre os documentos e seus metadados
+        formatted_chunks = []
         for doc, metadata in zip(all_docs, all_metadatas_results):
-            formatted_chunks += f"Documento: {metadata['document']}, Página: {metadata['page']}\n{doc}\n\n"
+            chunk = {
+                "documento": metadata["document"],
+                "pagina": metadata["page"],
+                "conteudo": doc.strip(),  # Remove espaços desnecessários
+            }
+            formatted_chunks.append(chunk)
 
         final_prompt = build_prompt(prompt_template, formatted_chunks, user_query)
         logging.info(f"Prompt construído:\n{final_prompt}")
