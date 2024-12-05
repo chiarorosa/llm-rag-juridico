@@ -110,8 +110,8 @@ def main():
             all_sentences, model_config["embedding_model_name"], model_config["batch_size"]
         )
 
-        # Adiciona as sentenças e embeddings à coleção
-        create_embeddings(collection, all_sentences, embeddings)
+        # Adiciona as sentenças, embeddings e metadados à coleção
+        create_embeddings(collection, all_sentences, embeddings, all_metadatas)
 
         # Ler os templates de prompt
         prompt_template_file = os.path.join(os.path.dirname(__file__), "../", prompts_config["template_file"])
