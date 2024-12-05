@@ -165,11 +165,13 @@ def main():
         # Consulta o banco de dados vetorial com as embeddings das queries
         docs = query_collection(collection, query_embeddings_list, retrieval_config["n_results"])
 
-        # Coleta todos os documentos retornados
+        # Coleta todos os documentos e metadados retornados
         all_docs = []
+        all_metadatas_results = []
         if docs and "documents" in docs:
-            for doc_list in docs["documents"]:
+            for doc_list, metadata_list in zip(docs["documents"], docs["metadatas"]):
                 all_docs.extend(doc_list)
+                all_metadatas_results.extend(metadata_list)
         else:
             logging.warning("Nenhum documento encontrado para as queries fornecidas.")
             return
@@ -178,11 +180,18 @@ def main():
             logging.warning("Nenhum documento relevante encontrado para as queries fornecidas.")
             return
 
-        # Remove duplicatas mantendo a ordem
-        all_docs = list(OrderedDict.fromkeys(all_docs))
+        # Remove duplicatas mantendo a ordem, tanto nos documentos quanto nos metadados
+        from collections import OrderedDict
 
-        # Constrói o prompt final para o modelo de linguagem
-        formatted_chunks = "\n".join([f"{chunk}\n" for chunk in all_docs])
+        combined = list(OrderedDict.fromkeys(zip(all_docs, all_metadatas_results)))
+        all_docs = [item[0] for item in combined]
+        all_metadatas_results = [item[1] for item in combined]
+
+        # Formatar os chunks para incluir os metadados
+        formatted_chunks = ""
+        for doc, metadata in zip(all_docs, all_metadatas_results):
+            formatted_chunks += f"Documento: {metadata['document']}, Página: {metadata['page']}\n{doc}\n\n"
+
         final_prompt = build_prompt(prompt_template, formatted_chunks, user_query)
         logging.info(f"Prompt construído:\n{final_prompt}")
 
