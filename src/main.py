@@ -16,7 +16,7 @@ import nltk
 import yaml
 
 # Importações dos módulos do projeto
-from data_loader import read_pdf
+from data_loader import read_pdf_with_metadata
 from embedding import create_embeddings, generate_embeddings
 from llm_interface import get_completion, parse_response
 from preprocessing import merge_lines
@@ -68,8 +68,9 @@ def main():
         # Caminho para a pasta de PDFs
         pdf_folder_path = os.path.join(os.path.dirname(__file__), "../", data_config["raw_data_path"])
 
-        # Lista para armazenar todas as sentenças de todos os PDFs
+        # Lista para armazenar todas as sentenças com metadados
         all_sentences = []
+        all_metadatas = []
 
         # Lista todos os arquivos PDF na pasta
         pdf_files = glob.glob(os.path.join(pdf_folder_path, "*.pdf"))
@@ -84,10 +85,14 @@ def main():
         # Percorre todos os arquivos PDF na pasta
         for pdf_file in pdf_files:
             logging.info(f"Lendo e processando o arquivo: {pdf_file}")
-            text = read_pdf(pdf_file)
-            sentences = merge_lines(text, tokenizer_config["path"])
-            logging.info(f"Número de sentenças extraídas do arquivo {pdf_file}: {len(sentences)}")
-            all_sentences.extend(sentences)
+            sentences_with_metadata = read_pdf_with_metadata(pdf_file)
+            if sentences_with_metadata:
+                for item in sentences_with_metadata:
+                    all_sentences.append(item["sentence"])
+                    all_metadatas.append({"document": item["document"], "page": item["page"]})
+                logging.info(f"Número de sentenças extraídas do arquivo {pdf_file}: {len(sentences_with_metadata)}")
+            else:
+                logging.warning(f"Nenhuma sentença extraída do arquivo {pdf_file}.")
 
         # Verifica se coletou alguma sentença
         if not all_sentences:
