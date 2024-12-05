@@ -37,22 +37,22 @@ def generate_embeddings(sentences, model_name, batch_size):
     return embeddings
 
 
-def create_embeddings(collection, sentences, embeddings):
+# src/embedding.py
+
+
+def create_embeddings(collection, sentences, embeddings, metadatas):
     """
-    Adiciona sentenças e seus embeddings ao banco de dados vetorial.
+    Adiciona sentenças, seus embeddings e metadados ao banco de dados vetorial.
 
     Args:
         collection (chromadb.Collection): Coleção do banco vetorial.
         sentences (list): Lista de sentenças.
         embeddings (torch.Tensor): Tensor contendo os embeddings das sentenças.
+        metadatas (list): Lista de metadados correspondentes a cada sentença.
     """
     embeddings_list = embeddings.cpu().numpy().tolist()
     ids = [f"sentence_{idx}" for idx in range(len(sentences))]
 
     # Adiciona todos os dados de uma vez ao ChromaDB
-    collection.add(
-        documents=sentences,
-        embeddings=embeddings_list,
-        ids=ids,
-    )
+    collection.add(documents=sentences, embeddings=embeddings_list, ids=ids, metadatas=metadatas)
     logging.info(f"Adicionadas {len(sentences)} sentenças e seus embeddings ao banco de dados vetorial.")
