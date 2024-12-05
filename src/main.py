@@ -1,7 +1,7 @@
 # src/main.py
 
 import argparse
-import glob  # Importar glob para listar arquivos
+import glob
 import logging
 import os
 import sys
@@ -19,7 +19,6 @@ import yaml
 from data_loader import read_pdf_with_metadata
 from embedding import create_embeddings, generate_embeddings
 from llm_interface import get_completion, parse_response
-from preprocessing import merge_lines
 from retrieval import query_collection
 from utils import build_prompt
 
@@ -85,7 +84,7 @@ def main():
         # Percorre todos os arquivos PDF na pasta
         for pdf_file in pdf_files:
             logging.info(f"Lendo e processando o arquivo: {pdf_file}")
-            sentences_with_metadata = read_pdf_with_metadata(pdf_file)
+            sentences_with_metadata = read_pdf_with_metadata(pdf_file, tokenizer_config["path"])
             if sentences_with_metadata:
                 for item in sentences_with_metadata:
                     all_sentences.append(item["sentence"])
@@ -181,9 +180,16 @@ def main():
             return
 
         # Remove duplicatas mantendo a ordem, tanto nos documentos quanto nos metadados
-        from collections import OrderedDict
+        seen = set()
+        combined = []
+        for doc, metadata in zip(all_docs, all_metadatas_results):
+            # Converte o metadata dict em uma tupla ordenada de itens para torná-lo hashável
+            metadata_tuple = tuple(sorted(metadata.items()))
+            key = (doc, metadata_tuple)
+            if key not in seen:
+                seen.add(key)
+                combined.append((doc, metadata))
 
-        combined = list(OrderedDict.fromkeys(zip(all_docs, all_metadatas_results)))
         all_docs = [item[0] for item in combined]
         all_metadatas_results = [item[1] for item in combined]
 

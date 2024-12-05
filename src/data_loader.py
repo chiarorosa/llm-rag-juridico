@@ -1,9 +1,13 @@
 # src/data_loader.py
 
+import os
+
 import fitz
 
+from preprocessing import merge_lines
 
-def read_pdf_with_metadata(file_path):
+
+def read_pdf_with_metadata(file_path, tokenizer_path):
     """
     Lê o conteúdo de um arquivo PDF e retorna uma lista de tuplas contendo
     o texto da sentença, o nome do documento e o número da página.
