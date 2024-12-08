@@ -9,10 +9,11 @@ import sys
 # Adiciona o diretório 'src' ao sys.path para permitir imports relativos
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from collections import OrderedDict
+import nltk
+
+nltk.download("punkt_tab")
 
 import chromadb
-import nltk
 import yaml
 
 # Importações dos módulos do projeto
