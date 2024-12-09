@@ -4,7 +4,7 @@ data:
   raw_data_path: "data/raw/"
 
 model:
-  llm_name: "qwen2.5:7b"
+  llm_name: "qwen2.5:3b"
   #llm_name: "cnmoro/mistral_7b_portuguese:q8_0"
   #llm_name: "llama3.1:8b"
   #llm_name: "llava-llama3"

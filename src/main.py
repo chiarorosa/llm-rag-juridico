@@ -156,19 +156,18 @@ def main(
             return
 
         # Processa a resposta e extrai termos e respostas fictícias
-        response_json = parse_response(response)
-        if response_json is None:
-            logging.error("Não foi possível parsear a resposta do modelo para a expansão da query.")
-            return
+        logging.info(f"termos {response}")
+        try:
+            # Remove trechos desnecessários, como a indicação de ser código
+            prequery = response.strip().strip('"""').strip("```json").strip("```")
 
-        query_list = (
-            response_json["termos_relacionados"]
-            + response_json["áreas_do_direito"]
-            + response_json["palavras_chave_específicas"]
-            + response_json["conceitos_jurídicos_amplos"]
-        )
-        if query_list == []:
-            logging.warning("Nenhum termo relacionado foi extraído da resposta do modelo.")
+            # Parse do JSON
+            prequery = json.loads(prequery)
+            query_list = parse_response(prequery)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Erro ao fazer o parse do JSON: {e}")
+        if query_list is None:
+            logging.error("Não foi possível extrair termos da resposta do modelo.")
             return
         logging.info(f"Expansão: {query_list}")
 

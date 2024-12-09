@@ -1,8 +1,6 @@
 # src/llm_interface.py
 
-import json
 import logging
-import re
 
 from ollama import chat
 
@@ -31,71 +29,27 @@ def get_completion(prompt, system_prompt, model):
 
 def parse_response(response):
     try:
-        # Limpar e remover delimitadores indesejados
-        response = response.strip()
-        if response.startswith("```json"):
-            response = response[7:]
-        if response.endswith("```"):
-            response = response[:-3]
+        # Se a resposta for uma string JSON, tenta carregá-la como dicionário
+        if isinstance(response, str):
+            response = json.loads(response)
 
-        # Decodificar JSON
-        data = json.loads(response)
+        # Inicializa a lista para coletar todos os termos
+        termos_combinados = []
 
-        # Validar campos esperados
-        consulta_expandida = data.get("consulta_expandida", {})
-        termos_relacionados = consulta_expandida.get("termos_relacionados", [])
-        areas_do_direito = consulta_expandida.get("áreas_do_direito", [])
-        palavras_chave_específicas = consulta_expandida.get("palavras_chave_específicas", [])
-        conceitos_jurídicos_amplos = consulta_expandida.get("conceitos_jurídicos_amplos", [])
+        # Função auxiliar para processar dicionários recursivamente
+        def extrair_termos(dados):
+            for key, value in dados.items():
+                if isinstance(value, list):  # Adiciona diretamente listas
+                    termos_combinados.extend(value)
+                elif isinstance(value, dict):  # Explora dicionários aninhados
+                    extrair_termos(value)
 
-        return {
-            "termos_relacionados": termos_relacionados,
-            "áreas_do_direito": areas_do_direito,
-            "palavras_chave_específicas": palavras_chave_específicas,
-            "conceitos_jurídicos_amplos": conceitos_jurídicos_amplos,
-        }
-    except json.JSONDecodeError as e:
-        logging.error(f"Erro ao decodificar JSON: {e}")
-        return {}
+        # Processa o dicionário inicial
+        extrair_termos(response)
+
+        # Remove duplicados e retorna como lista de sentenças
+        return list(set(termos_combinados))
+
     except Exception as e:
-        logging.error(f"Erro inesperado ao processar a resposta: {e}")
-        return {}
-    # """
-    # Limpa e tenta decodificar uma resposta JSON.
-
-    # Args:
-    #     response (str): Resposta do modelo.
-
-    # Returns:
-    #     dict: Objeto JSON decodificado ou None se houver erro.
-    # """
-    # if not response:
-    #     logging.warning("A resposta do modelo está vazia.")
-    #     return None
-
-    # # Remove marcadores de código e espaços em branco
-    # response = response.strip().strip("```").strip()
-
-    # # Procura pelo primeiro objeto JSON na resposta
-    # match = re.search(r"\{.*\}", response, re.DOTALL)
-    # if match:
-    #     json_str = match.group()
-    #     # Tenta decodificar o JSON
-    #     try:
-    #         return json.loads(json_str)
-    #     except json.JSONDecodeError as e:
-    #         logging.error(f"Erro ao decodificar JSON: {e}")
-    #         logging.info("Tentando corrigir a formatação do JSON...")
-
-    #         # Tenta corrigir aspas simples para aspas duplas
-    #         json_str_fixed = json_str.replace("'", '"')
-    #         try:
-    #             return json.loads(json_str_fixed)
-    #         except json.JSONDecodeError as e2:
-    #             logging.error(f"Erro ao decodificar JSON após correção: {e2}")
-    #             logging.error(f"JSON recebido: {json_str}")
-    #             return None
-    # else:
-    #     logging.error("Não foi possível encontrar um objeto JSON na resposta.")
-    #     logging.error(f"Resposta recebida: {response}")
-    #     return None
+        logging.error(f"Erro ao parsear a resposta: {e}")
+        return []
