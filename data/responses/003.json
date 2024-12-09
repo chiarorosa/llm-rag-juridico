@@ -1,0 +1,14 @@
+2024-12-08 22:15:01,976 - INFO - Resposta gerada:
+```json
+{
+  "consulta": [
+    {
+      "chunks": [
+        {"documento": "014.pdf", "pag": 1},
+        {"documento": "027.pdf", "pag": 1}
+      ],
+      "conteúdo": "Os julgamentos envolvendo agravo de instrumento e liquidação de sentença indicam o provimento parcial ou derrogação na análise dos recursos. Em '014.pdf', a apelação cível foi desconsiderada, enquanto em '027.pdf' houve dermação ao aguardar a instauração do contraditório."
+    }
+  ]
+}
+```
