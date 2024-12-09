@@ -119,7 +119,6 @@ O pipeline utiliza as seguintes bibliotecas principais:
 
 - Alterar o modelo de embeddings no arquivo `config.yaml`.
 - Modificar os templates de prompts em `prompts/prompt_template.yml`.
-- Integrar o pipeline com a API FastAPI ou a interface Streamlit para maior interatividade.
 
 ## Logs e Debug
 
