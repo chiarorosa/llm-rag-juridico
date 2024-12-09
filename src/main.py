@@ -5,6 +5,8 @@ import glob
 import json
 import logging
 import os
+import random
+import string
 import sys
 
 # Adiciona o diretório 'src' ao sys.path para permitir imports relativos
@@ -24,6 +26,10 @@ from llm_interface import get_completion, parse_response
 from retrieval import query_collection
 from utils import build_prompt
 
+DEFAULT_QUERY = (
+    "Quais são os requisitos legais para a concessão de tutela antecipada em casos que envolvem direito do consumidor?"
+)
+
 
 def parse_arguments():
     """
@@ -34,21 +40,24 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def main():
+def main(
+    query_input: str = DEFAULT_QUERY,
+):
     """
     Fluxo principal de execução do pipeline RAG.
     """
     # Configuração do logging
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+    # Gerar um trecho aleatório
+    prefixo_rand = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
+
     logging.info("Iniciando a aplicação...")
 
     # Analisa os argumentos de linha de comando
-    args = parse_arguments()
-    user_query = (
-        args.query
-        or "Quais são os requisitos legais para a concessão de tutela antecipada em casos que envolvem direito do consumidor?"
-    )
+    # args = parse_arguments()
+    # user_query = args.query or query_input
+    user_query = query_input
 
     try:
         ###
@@ -108,7 +117,9 @@ def main():
 
         # Criar cliente e coleção no banco vetorial
         chroma_client = chromadb.Client()
-        collection = chroma_client.create_collection(name=retrieval_config["collection_name"], embedding_function=None)
+        collection = chroma_client.create_collection(
+            name=retrieval_config["collection_name"] + "_" + prefixo_rand, embedding_function=None
+        )
 
         # Gera embeddings das sentenças
         embeddings = generate_embeddings(
@@ -214,6 +225,8 @@ def main():
         # Exibe a query original e a resposta gerada
         logging.info(f"Query original: {user_query}")
         logging.info(f"Resposta gerada:\n{final_response}")
+
+        return final_response
 
         # Decodificar o JSON
         # data = json.loads(final_response)

@@ -1,0 +1,17 @@
+2024-12-08 22:26:49,594 - INFO - Query original: Quais são os critérios utilizados pelos tribunais para indeferir pedidos de tutela antecipada em casos de direito civil, especialmente quando há ausência de título executivo ou falta de comprovação de risco ao resultado útil do processo?
+2024-12-08 22:26:49,594 - INFO - Resposta gerada:
+```json
+{
+  "consulta": [
+    {
+      "chunks": [
+        {"documento": "031.pdf", "pag": 1},
+        {"documento": "029.pdf", "pag": 1},
+        {"documento": "028.pdf", "pag": 1},
+        {"documento": "033.pdf", "pag": 1}
+      ],
+      "conteúdo": "Os julgadores estabeleceram que a antecipação da tutela é condicionada à presença de elementos que evidenciem a probabilidade do direito e o perigo de dano ou risco ao resultado útil do processo. Casos em que essa condição não foi atendida incluem a falta de demonstração da probabilidade do direito invocado, bem como a ausência de perigo de dano ou risco ao resultado útil do processo nesse momento processual."
+    }
+  ]
+}
+```
