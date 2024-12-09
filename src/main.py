@@ -2,6 +2,7 @@
 
 import argparse
 import glob
+import json
 import logging
 import os
 import sys
@@ -45,7 +46,8 @@ def main():
     # Analisa os argumentos de linha de comando
     args = parse_arguments()
     user_query = (
-        args.query or "Quais os fundamentos jurídicos para a condenação por práticas abusivas em pacotes turísticos?"
+        args.query
+        or "Quais são os requisitos legais para a concessão de tutela antecipada em casos que envolvem direito do consumidor?"
     )
 
     try:
@@ -146,19 +148,16 @@ def main():
             logging.error("Não foi possível parsear a resposta do modelo para a expansão da query.")
             return
 
-        queries = response_json.get("termos", [])
-        respostas = response_json.get("respostas_ficticias", [])
-
-        logging.info(f"Queries: {queries}")
-        logging.info(f"Respostas fictícias: {respostas}")
-
-        # Verifica se as queries e respostas não estão vazias
-        if not queries and not respostas:
-            logging.warning("Nenhuma query ou resposta fictícia disponível para recuperação.")
+        query_list = (
+            response_json["termos_relacionados"]
+            + response_json["áreas_do_direito"]
+            + response_json["palavras_chave_específicas"]
+            + response_json["conceitos_jurídicos_amplos"]
+        )
+        if query_list == []:
+            logging.warning("Nenhum termo relacionado foi extraído da resposta do modelo.")
             return
-        else:
-            # Combina as queries e respostas para recuperação
-            query_list = queries + respostas
+        logging.info(f"Expansão: {query_list}")
 
         # Gera embeddings para todas as queries de uma vez
         query_embeddings = generate_embeddings(
@@ -215,6 +214,25 @@ def main():
         # Exibe a query original e a resposta gerada
         logging.info(f"Query original: {user_query}")
         logging.info(f"Resposta gerada:\n{final_response}")
+
+        # Decodificar o JSON
+        # data = json.loads(final_response)
+
+        # # Acessar os dados
+        # consulta = data.get("consulta", [])
+        # if consulta:
+        #     for item in consulta:
+        #         chunks = item.get("chunks", [])
+        #         conteudo = item.get("conteúdo", "")
+
+        #         # Imprimir os chunks recuperados
+        #         print("Chunks Recuperados:")
+        #         for chunk in chunks:
+        #             print(f" - Documento: {chunk['documento']}, Página: {chunk['pag']}")
+
+        #         # Imprimir o conteúdo gerado
+        #         print("\nConteúdo:")
+        #         print(conteudo)
 
     except Exception as e:
         logging.exception("Ocorreu um erro durante a execução do pipeline:")

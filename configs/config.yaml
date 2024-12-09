@@ -4,14 +4,14 @@ data:
   raw_data_path: "data/raw/"
 
 model:
-  #llm_name: "qwen2.5:7b"
+  llm_name: "qwen2.5:7b"
   #llm_name: "cnmoro/mistral_7b_portuguese:q8_0"
   #llm_name: "llama3.1:8b"
-  llm_name: "llava-llama3"
+  #llm_name: "llava-llama3"
   #embedding_model_name: "all-MiniLM-L6-v2"
-  #embedding_model_name: "all-mpnet-base-v2"
-  embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2" # @https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-  batch_size: 16
+  embedding_model_name: "all-mpnet-base-v2"
+  #embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2" # @https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  batch_size: 32
 
 tokenizer:
   path: "tokenizers/punkt/portuguese.pickle"
@@ -20,5 +20,9 @@ prompts:
   template_file: "prompts/prompt_template.yml"
 
 retrieval:
-  collection_name: "jurisab"
+  collection_name: "tjrs"
   n_results: 10
+
+tjrs:
+  jurisprudencia: ["tutela antecipada", "relação de consumo", "dano moral"]
+  #tutela antecipada -> 12304 comarca de Pelotas

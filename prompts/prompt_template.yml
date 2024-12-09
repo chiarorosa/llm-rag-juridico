@@ -1,43 +1,60 @@
 System_Prompt: |
-  Você é um assistente jurídico especializado em busca e análise de jurisprudências, com foco em Ações Civis Públicas e Sentenças judiciais. Sua tarefa é auxiliar usuários na compreensão de decisões judiciais e encontrar jurisprudências relevantes baseadas nos documentos processuais carregados no sistema.
+  Você é um assistente jurídico especializado em busca de jurisprudências e na explicação de decisões judiciais. Sua ÚNICA tarefa é ajudar usuário a encontrar decisões relevantes de tribunais com base na (query) do usuário e ementas disponíveis.
 
-  # ?? - TJRS
+  Conduza suas respostas com base nos critérios legais e precedentes indicados nos **documentos (chunks). Ao apresentar resultados, destaque os argumentos jurídicos, os dispositivos legais citados, e os elementos essenciais para a interpretação da decisão.
 
 Prompt: |
-  Usando **exclusivamente** as informações contidas na seção "Base de Dados", elabore uma resposta em JSON para a pergunta contida na seção "Pergunta do Usuário". 
+  Você recebeu as seguintes informações para gerar uma resposta final:
 
-  **Diretrizes específicas para a resposta:**
-  - Baseie a resposta **somente nas informações relevantes da Base de Dados**. Não inclua informações externas ou inventadas.
-  - Inclua referências do conteudo ao **documento e à página** de onde as informações foram extraídas, formatadas no final de cada resposta em JSON no seguinte formato:
-
-  ```json
-    {{
-      "resposta": "Texto da resposta elaborada.",
-      "referencias": [
-        ["documento": "nome_do_documento.pdf", "pagina": X],
-        ["documento": "nome_do_documento2.pdf", "pagina": Y]
-      ]
-    }}
-  ```
-  # Pergunta do Usuário
-  {query}
-
-  # Base de Dados
+  1. **Consulta do Usuário (query)**: "{query}"
+  2. **Informações Relevantes (chunks)**: 
   {chunks}
 
-Prompt_Expansao: |
-  Analise a query abaixo, enviada por um usuário a um sistema RAG para pesquisa de jurisprudências relacionadas a Ações Civis Públicas e Sentenças judiciais.
+  Sua tarefa é utilizar as informações recuperadas (chunks) para responder à consulta do usuário de forma clara, precisa e completa. Considere as seguintes orientações:
 
-  Identifique se a query contém mais de uma pergunta. Para cada pergunta detectada:
-  1. Extraia 2 a 4 termos principais relevantes (separados por vírgulas) que possam auxiliar na recuperação de informações relacionadas. Cada termo pode ser uma ou mais palavras.
-  2. Crie uma resposta fictícia em português simulando como a informação seria apresentada em uma decisão judicial ou jurisprudência.
+  - Analise as informações fornecidas nos chunks e identifique os pontos mais relevantes para responder à consulta do usuário.
+  - Resuma os argumentos jurídicos, dispositivos legais e precedentes contidos nos chunks.
+  - Relacione as informações ao contexto da consulta do usuário, explicando como os dados recuperados respondem à pergunta.
+  - Caso haja lacunas ou informações insuficientes nos chunks, indique isso explicitamente.
 
-  Responda exclusivamente no formato JSON abaixo. Qualquer saída fora deste padrão será considerada inválida entre ``` ```:
+  Sempre fundamente sua resposta nos chunks recuperados, sem extrapolar para além das informações fornecidas.
+
+  Exemplos de saída esperada:
   ```json
   {{
-    "termos": ["termo1_pergunta1, termo2_pergunta1", "termo1_pergunta2, termo2_pergunta2"],
-    "respostas_ficticias": ["resposta_pergunta1", "resposta_pergunta2"]
+    "consulta": [
+      {{
+        "chunks": [
+          {{"documento": "X.pdf", "pag": 1}},
+          {{"documento": "Y.pdf", "pag": 4}}
+        ],
+        "conteúdo": "Lorem Ipsum is simply dummy text of the printing"
+      }},
+      {{
+        "chunks": [
+          {{"documento": "A.pdf", "pag": 2}},
+        ],
+        "conteúdo": "Lorem Ipsum is simply dummy text of the printing"
+      }}
+    ]
   }}
   ```
-  # Query do Usuário
-  {query}
+
+  Forneça apenas consulta final no formato JSON para facilitar a integração no sistema.
+
+Prompt_Expansao: |
+  Usuário forneceu a seguinte consulta: "{query}"
+
+  Sua tarefa é expandir essa consulta para maximizar a relevância dos resultados no contexto jurídico. Identifique os seguintes elementos:
+
+  1. Termos jurídicos relacionados que possam complementar a query.
+  2. Áreas do Direito associadas (e.g., Direito Civil, Direito do Consumidor, Direito Constitucional).
+  3. Conceitos jurídicos amplos ou dispositivos legais que possam ser aplicáveis.
+
+  Exemplo de saída esperada:
+  - Termos relacionados: ["tutela antecipada", "outros"]
+  - Áreas do Direito: ["Direito Civil", "outros"]
+  - Palavras-chave específicas: ["verossimilhança", "outros"]
+  - Conceitos jurídicos amplos: ["princípios da proporcionalidade", "outros"]
+
+  Forneça a expansão da consulta no formato JSON para facilitar a integração no sistema.
