@@ -24,7 +24,7 @@ from data_loader import read_pdf_with_metadata
 from embedding import generate_embeddings, store_embeddings
 from llm_interface import get_completion, parse_response
 from retrieval import query_collection
-from utils import build_prompt
+from utils import build_prompt, cleaned_json
 
 DEFAULT_QUERY = (
     "Quais são os requisitos legais para a concessão de tutela antecipada em casos que envolvem direito do consumidor?"
@@ -157,15 +157,8 @@ def main(
 
         # Processa a resposta e extrai termos e respostas fictícias
         logging.info(f"termos {response}")
-        try:
-            # Remove trechos desnecessários, como a indicação de ser código
-            prequery = response.strip().strip('"""').strip("```json").strip("```")
-
-            # Parse do JSON
-            prequery = json.loads(prequery)
-            query_list = parse_response(prequery)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Erro ao fazer o parse do JSON: {e}")
+        prequery = cleaned_json(response)
+        query_list = parse_response(prequery)
         if query_list is None:
             logging.error("Não foi possível extrair termos da resposta do modelo.")
             return
@@ -226,15 +219,7 @@ def main(
         # resposta gerada
         logging.info(f"Resposta gerada:\n{final_response}")
 
-        try:
-            # Remove trechos desnecessários, como a indicação de ser código
-            cleaned_data = final_response.strip().strip('"""').strip("```json").strip("```")
-
-            # Parse do JSON
-            parsed_data = json.loads(cleaned_data)
-            return parsed_data
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Erro ao fazer o parse do JSON: {e}")
+        return cleaned_json(final_response)
 
     except Exception as e:
         logging.exception("Ocorreu um erro durante a execução do pipeline:")
