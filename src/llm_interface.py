@@ -1,5 +1,6 @@
 # src/llm_interface.py
 
+import json
 import logging
 
 from ollama import chat
