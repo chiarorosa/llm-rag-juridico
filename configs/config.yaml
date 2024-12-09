@@ -26,3 +26,4 @@ retrieval:
 tjrs:
   jurisprudencia: ["tutela antecipada", "relação de consumo", "dano moral"]
   #tutela antecipada -> 12304 comarca de Pelotas
+  #@ https://www.tjrs.jus.br/novo/buscas-solr/?aba=jurisprudencia&q&conteudo_busca=ementa_completa
