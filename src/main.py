@@ -226,26 +226,15 @@ def main(
         logging.info(f"Query original: {user_query}")
         logging.info(f"Resposta gerada:\n{final_response}")
 
-        return final_response
+        try:
+            # Remove trechos desnecessários, como a indicação de ser código
+            cleaned_data = final_response.strip().strip('"""').strip("```json").strip("```")
 
-        # Decodificar o JSON
-        # data = json.loads(final_response)
-
-        # # Acessar os dados
-        # consulta = data.get("consulta", [])
-        # if consulta:
-        #     for item in consulta:
-        #         chunks = item.get("chunks", [])
-        #         conteudo = item.get("conteúdo", "")
-
-        #         # Imprimir os chunks recuperados
-        #         print("Chunks Recuperados:")
-        #         for chunk in chunks:
-        #             print(f" - Documento: {chunk['documento']}, Página: {chunk['pag']}")
-
-        #         # Imprimir o conteúdo gerado
-        #         print("\nConteúdo:")
-        #         print(conteudo)
+            # Parse do JSON
+            parsed_data = json.loads(cleaned_data)
+            return parsed_data
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Erro ao fazer o parse do JSON: {e}")
 
     except Exception as e:
         logging.exception("Ocorreu um erro durante a execução do pipeline:")
