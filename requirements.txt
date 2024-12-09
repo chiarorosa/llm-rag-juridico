@@ -4,6 +4,7 @@ torch
 PyYAML
 ollama
 PyMuPDF
+PyPDF2
 sentence-transformers
 tqdm
 streamlit
