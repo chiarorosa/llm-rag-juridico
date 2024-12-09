@@ -6,3 +6,4 @@ ollama
 PyMuPDF
 sentence-transformers
 tqdm
+streamlit

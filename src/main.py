@@ -59,6 +59,8 @@ def main(
     # user_query = args.query or query_input
     user_query = query_input
 
+    logging.info(f"Query original: {user_query}")
+
     try:
         ###
         # Início do pipeline
@@ -222,8 +224,7 @@ def main(
             logging.error("Não foi possível obter a resposta final do modelo.")
             return
 
-        # Exibe a query original e a resposta gerada
-        logging.info(f"Query original: {user_query}")
+        # resposta gerada
         logging.info(f"Resposta gerada:\n{final_response}")
 
         try:

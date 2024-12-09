@@ -9,8 +9,8 @@ model:
   #llm_name: "llama3.1:8b"
   #llm_name: "llava-llama3"
   #embedding_model_name: "all-MiniLM-L6-v2"
-  embedding_model_name: "all-mpnet-base-v2"
-  #embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2" # @https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  #embedding_model_name: "all-mpnet-base-v2"
+  embedding_model_name: "paraphrase-multilingual-MiniLM-L12-v2" # @https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
   batch_size: 32
 
 tokenizer:
