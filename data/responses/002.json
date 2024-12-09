@@ -1,0 +1,14 @@
+2024-12-08 22:12:30,994 - INFO - Resposta gerada:
+```json
+{
+  "consulta": [
+    {
+      "chunks": [
+        {"documento": "014.pdf", "pag": 1},
+        {"documento": "006.pdf", "pag": 1}
+      ],
+      "conteúdo": "O caso examinado defende que a autora tem direito à meação integral sobre o resultado da safra de soja, não apenas metade como objeto do sequestro deferido em antecipação de tutela. Além disso, sugere-se a concessão de antecipação de tutela para suspensão dos descontos em benefício previdenciário, por possibilidade de ter ocorrido falha no dever de informação ao consumidor."
+    }
+  ]
+}
+```
